@@ -7,10 +7,11 @@ const Main = imports.ui.main;
 
 const HOT_AREA = 3;
 
-const EDGE_TOP = 0;
-const EDGE_LEFT = 1;
-const EDGE_RIGHT = 2;
-const EDGE_BOTTOM = 3;
+const EDGE_TOP_LEFT = 0;
+const EDGE_TOP_RIGHT = 1;
+const EDGE_LEFT = 2;
+const EDGE_RIGHT = 3;
+const EDGE_BOTTOM = 4;
 
 // Keep track of the actors and their handler Ids so that listeners can be disconnected
 let actors = [ ];
@@ -18,13 +19,14 @@ let handlers = [ ];
 
 function _makeHotEdges(){
 	// Top Hot Area to open overview
-	let topArea = _makeEdgeActor(EDGE_TOP);
-	var topHandler = topArea.connect('scroll-event', _toggleOverview);
-	let topTouchHandler = topArea.connect('button-press-event', _showOverview);
+	let topAreaLeft = _makeEdgeActor(EDGE_TOP_LEFT);
+	let topTouchHandlerLeft = topAreaLeft.connect('button-press-event', _showOverview);
+	
+	let topAreaRight = _makeEdgeActor(EDGE_TOP_RIGHT);
+	let topTouchHandlerRight = topAreaRight.connect('button-press-event', _showOverview);
 
 	// Bottom Hot Area to open messaging tray
 	let bottomArea = _makeEdgeActor(EDGE_BOTTOM);
-	let bottomHandler = bottomArea.connect('scroll-event', _toggleMessageTray);
 	let bottomTouchHandler = bottomArea.connect('button-press-event', _showMessageTray);
 
 	// Right Hot Area to scroll workspaces
@@ -33,21 +35,20 @@ function _makeHotEdges(){
 
 	// Add the actors
 	args = { };
-	Main.layoutManager.addChrome(topArea, args);
+	Main.layoutManager.addChrome(topAreaLeft, args);
+	Main.layoutManager.addChrome(topAreaRight, args);
 	Main.layoutManager.addChrome(bottomArea, args);
 	Main.layoutManager.addChrome(rightArea, args);
 
 	// Save the actors
-	actors.push(topArea);
-	actors.push(topArea);
-	actors.push(bottomArea);
+	actors.push(topAreaLeft);
+	actors.push(topAreaRight);
 	actors.push(bottomArea);
 	actors.push(rightArea);
 
 	// Save the handlers
-	handlers.push(topHandler);
-	handlers.push(topTouchHandler);
-	handlers.push(bottomHandler);
+	handlers.push(topTouchHandlerLeft);
+	handlers.push(topTouchHandlerRight);
 	handlers.push(bottomTouchHandler);
 	handlers.push(rightHandler);
 }
@@ -68,6 +69,9 @@ function _makeEdgeActor(edge){
 	// Don't allow gesture on the upper right status/power icons
 	var xOffsetRight = 145;
 
+	// Don't allow gestures on the clock in the middle of the panel
+	var xOffsetMiddle = 90;
+
 	// How many pixels high the top panel is 
 	var yOffset = Main.panel.actor.height;
 
@@ -80,10 +84,17 @@ function _makeEdgeActor(edge){
 	var monitor = Main.layoutManager.primaryMonitor;
 
 	switch(edge){
-	case EDGE_TOP:
+	case EDGE_TOP_LEFT:
 		x = xOffsetLeft;
 		y = 0;
-		width = monitor.width - xOffsetLeft - xOffsetRight;
+		width = (monitor.width / 2) - xOffsetLeft - xOffsetMiddle;
+		height = HOT_AREA;
+		break;
+
+	case EDGE_TOP_RIGHT:
+		x = (monitor.width / 2) + xOffsetMiddle;
+		y = 0;
+		width = (monitor.width / 2) - xOffsetMiddle - xOffsetRight;
 		height = HOT_AREA;
 		break;
 
