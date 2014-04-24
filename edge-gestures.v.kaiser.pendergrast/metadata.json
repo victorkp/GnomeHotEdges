@@ -1,0 +1,1 @@
+{"shell-version": ["3.8", "3.10", "3.12"], "uuid": "edge-gestures@v.kaiser.pendergrast", "name": "Hot Edges", "description": "Click the top edge of your monitor to open overview, bottom edge to open message tray. Scroll along the right edge to switch workspaces"}
